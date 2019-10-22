@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load my_tag %}
+
+<div class="container-fluid mt-4 mb-4 p-5">
+    <div class="row">
+        <div class="col-md-4 col-12">
+                <form class="bg-warning p-4 rounded shadow-sm" action="{% url 'books:index' %}" method="POST">
+                        <h2><i class="fa fa-plus"></i> Add Book</h2>
+                        {% csrf_token %}
+                        <div class="form-row">
+                                <div class="form-group col-md-12 mb-0 mt-4">
+                                  {{ form.book_name|as_crispy_field }}
+                                </div>
+                                <div class="form-group col-lg-6 col-12 mb-0">
+                                  {{ form.price|as_crispy_field }}
+                                </div>
+                                <div class="form-group col-lg-6 col-12 mb-0">
+                                   {{ form.publish_date|as_crispy_field }}
+                                </div>
+                              </div>
+                        <button type="submit" class="btn btn-success mb-4">Save</button>  
+                    </form>
+        </div>
+        <div class="col-md-8 col-12">
+            <h2><i class="fa fa-book"></i> Book List</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                      <th>Book_ID</th>
+                      <th>Book_Name</th>
+                              <th>Price</th>
+                              <th>Publish_Date</th>
+                              <th>Action</th>
+                          </tr>
+                        </thead>
+                        {% for data in books %}
+                        <tbody>
+                          <tr>
+                              <td>{{data.id}}</td>
+                              <td>{{data.book_name}}</td>
+                              <td>{{data.price}}</td>
+                              <td>{{data.publish_date}}</td>
+                              <td>
+                                  <form action="{% url 'books:sold' %}" method="POST">
+                                      {% csrf_token %}
+                                      <input name="book_id" type="text" value={{data.id}} hidden/>
+                                      <button type="submit" class="btn btn-primary btn -sm">Purchase</button>
+                                  </form>
+                              </td>
+                          </tr>
+                        </tbody>
+                        {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid p-5">
+    <div class="jumbotron">
+        <div class="row mb-2">
+            <div class="col-5">
+                <h3><i class="fa fa-bookmark"></i> SOLD BOOKS INFO</h3>
+            </div>
+            <div class=" col-7">
+                <form action="{% url 'books:find' %}" class="form" method="POST">
+                    {% csrf_token %}
+                    <div class="form-inline">
+                        <label class="mr-2"><i class="fa fa-calendar-alt"></i> Find By Year</label>
+                        <input type="text" id="year_picker" name="search_by_year" class="form-control">
+                        <button class="btn btn-primary ml-1">
+                            <i class="fa fa-search"></i> Find
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Book_ID</th>
+                <th>Book_Name</th>
+                <th>Publish Date</th>
+                <th>QTY_SOLD</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in booksold %}
+                    {% if year %}
+                        {% if data.book_id.publish_date.year == year %}
+                            <tr>
+                                <td>{{ data.book_id.id }}</td>
+                                <td>{{ data.book_id.book_name }}</td>
+                                <td>{{ data.book_id.publish_date.year }}</td>
+                                <td>{{ data.qty_sold }}</td>
+                                <td>{% multiply data.qty_sold data.book_id.price %}</td>
+                            </tr>
+                        {% endif %}
+                    {% else %}
+                        <tr>
+                            <td>{{ data.book_id.id }}</td>
+                            <td>{{ data.book_id.book_name }}</td>
+                            <td>{{ data.book_id.publish_date.year }}</td>
+                            <td>{{ data.qty_sold }}</td>
+                            <td>{% multiply data.qty_sold data.book_id.price %}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+{% endblock %}
